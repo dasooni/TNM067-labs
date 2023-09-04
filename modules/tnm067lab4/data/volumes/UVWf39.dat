@@ -1,0 +1,17 @@
+RawFile: UVWf39.raw
+Resolution: 500 500 100
+Format: Vec3FLOAT32
+BasisVector1: 2139 0 0
+BasisVector2: 0 2004 0
+BasisVector3: 0 0 20.185
+Offset: -1069.5 -1002 -10.0925
+WorldVector1: 1 0 0 0
+WorldVector2: 0 1 0 0
+WorldVector3: 0 0 1 0
+WorldVector4: 0 0 0 1
+DataRange: -306.637 306.637
+ValueRange: -286.103 306.637
+Unit: km/h
+duration: 1
+nodata: 1.0000000e+35
+timestamp: 39
