@@ -40,25 +40,34 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
         T finalColor(0);
 
         // DUMMY COLOR, remove or overwrite this bellow
-        finalColor = inPixels[inIndex(
-            glm::clamp(size2_t(outImageCoords), size2_t(0), size2_t(inputSize - size2_t(1))))];
+        //finalColor = inPixels[inIndex(
+          //  glm::clamp(size2_t(outImageCoords), size2_t(0), size2_t(inputSize - size2_t(1))))];
 
         switch (method) {
             case ImageUpsampler::IntepolationMethod::PiecewiseConstant: {
                 // Task 6
                 // Update finalColor
+
+                finalColor = inPixels[inIndex(glm::clamp(size2_t(inImageCoords), size2_t(0),
+                                                         size2_t(inputSize - size2_t(1))))];
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Bilinear: {
-                // Update finalColor
+
+                 finalColor = inPixels[inIndex(glm::clamp(size2_t(inImageCoords.x), size2_t(0),
+                                                         size2_t(inputSize - size2_t(1))))];
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Biquadratic: {
                 // Update finalColor
+                finalColor = inPixels[inIndex(glm::clamp(size2_t(inImageCoords), size2_t(0),
+                                                         size2_t(inputSize - size2_t(1))))];
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Barycentric: {
                 // Update finalColor
+                finalColor = inPixels[inIndex(glm::clamp(size2_t(inImageCoords), size2_t(0),
+                                                         size2_t(inputSize - size2_t(1))))];
                 break;
             }
             default:
@@ -121,8 +130,15 @@ void ImageUpsampler::process() {
 dvec2 ImageUpsampler::convertCoordinate(ivec2 outImageCoords, size2_t inputSize, size2_t outputSize) {
     // TODO implement
     dvec2 c(outImageCoords);
-
     // TASK 5: Convert the outImageCoords to its coordinates in the input image
+    // Since the output image is larger than the input
+    //image, the returned coordinates may be between pixels in the input image,
+      //  consequently the calculated coordinates must be of the type double.
+
+    // outputSize > inputSize
+
+    c.x = (double)c.x * inputSize.x / outputSize.x;
+    c.y = (double)c.y * inputSize.y / outputSize.y;
 
     return c;
 }
