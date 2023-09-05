@@ -47,27 +47,64 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
             case ImageUpsampler::IntepolationMethod::PiecewiseConstant: {
                 // Task 6
                 // Update finalColor
-
-                finalColor = inPixels[inIndex(glm::clamp(size2_t(inImageCoords), size2_t(0),
-                                                         size2_t(inputSize - size2_t(1))))];
+                finalColor = inPixels[inIndex(glm::clamp(size2_t(inImageCoords), 
+                    size2_t(0),
+                    size2_t(inputSize - size2_t(1))))];
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Bilinear: {
+                auto origin = dvec2(floor(inImageCoords.x), floor(inImageCoords.y));
+                auto a = dvec2(ceil(inImageCoords.x), floor(inImageCoords.y)); // a = origin + (1,0)
+                auto b = dvec2(floor(inImageCoords.x), ceil(inImageCoords.y)); // b = origin + (0,1)
+                auto c = dvec2(ceil(inImageCoords.x), ceil(inImageCoords.y)); // c = origin + (1,1)
 
-                 finalColor = inPixels[inIndex(glm::clamp(size2_t(inImageCoords.x), size2_t(0),
-                                                         size2_t(inputSize - size2_t(1))))];
+                auto n = std::array<T, 4>{ inPixels[inIndex(origin)], 
+                    inPixels[inIndex(a)], 
+                    inPixels[inIndex(b)], 
+                    inPixels[inIndex(c)] };
+
+                double x = inImageCoords.x - std::floor(inImageCoords.x);
+                double y = inImageCoords.y - std::floor(inImageCoords.y);
+
+                finalColor = TNM067::Interpolation::bilinear(n, x, y);
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Biquadratic: {
                 // Update finalColor
-                finalColor = inPixels[inIndex(glm::clamp(size2_t(inImageCoords), size2_t(0),
-                                                         size2_t(inputSize - size2_t(1))))];
+
+                auto origin = floor(inImageCoords);
+
+                std::array<T, 9> n = {
+                    inPixels[inIndex(origin)], 
+					inPixels[inIndex(origin + dvec2(1, 0))], 
+					inPixels[inIndex(origin + dvec2(2, 0))], 
+					inPixels[inIndex(origin + dvec2(0, 1))], 
+					inPixels[inIndex(origin + dvec2(1, 1))], 
+					inPixels[inIndex(origin + dvec2(2, 1))], 
+					inPixels[inIndex(origin + dvec2(0, 2))], 
+					inPixels[inIndex(origin + dvec2(1, 2))], 
+					inPixels[inIndex(origin + dvec2(2, 2))] };
+
+                auto x = inImageCoords.x - std::floor(inImageCoords.x);
+                auto y = inImageCoords.y - std::floor(inImageCoords.y);
+
+                finalColor = TNM067::Interpolation::biQuadratic(n, x, y);
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Barycentric: {
                 // Update finalColor
-                finalColor = inPixels[inIndex(glm::clamp(size2_t(inImageCoords), size2_t(0),
-                                                         size2_t(inputSize - size2_t(1))))];
+                auto origin = floor(inImageCoords);
+
+                std::array<T, 4> n = {
+					inPixels[inIndex(origin)],
+					inPixels[inIndex(origin + dvec2(1, 0))],
+					inPixels[inIndex(origin + dvec2(0, 1))],
+					inPixels[inIndex(origin + dvec2(1, 1))] };
+
+                auto x = inImageCoords.x - std::floor(inImageCoords.x);
+                auto y = inImageCoords.y - std::floor(inImageCoords.y);
+
+                finalColor = TNM067::Interpolation::barycentric(n, x, y);
                 break;
             }
             default:

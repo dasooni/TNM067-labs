@@ -37,6 +37,7 @@ T linear(const T& a, const T& b, F x) {
     if (x <= 0) return a;
     if (x >= 1) return b;
 
+    // interpolate between the colors a and b
     return a + x * (b - a);
 }
 
@@ -54,14 +55,11 @@ T linear(const T& a, const T& b, F x) {
 template<typename T, typename F = double> 
 T bilinear(const std::array<T, 4> &v, F x, F y) {
 
-    auto dx = x - floor(x);
-    auto dy = y - floor(y);
-
-
-    auto interpolatedVal1 = linear(v[0], v[1], dx);
-    auto interpolatedVal2 = linear(v[2], v[3], dx);
-
-    return linear(interpolatedVal1, interpolatedVal2, dy);
+    // interpolate in x direction
+    auto interpolatedVal1 = linear(v[0], v[1], x);
+    auto interpolatedVal2 = linear(v[2], v[3], x);
+    // interpolate in y direction and return
+    return linear(interpolatedVal1, interpolatedVal2, y);
 }
 
 
@@ -75,7 +73,9 @@ T bilinear(const std::array<T, 4> &v, F x, F y) {
 template <typename T, typename F = double>
 T quadratic(const T& a, const T& b, const T& c, F x) {
 
-    return (1 - x) * (1 - 2 * x) * a + 4 * x * (1 - x) * b + x * (2 * x - 1) * c;
+    return (1 - x) * (1 - 2 * x) * a 
+        + 4 * x * (1 - x) * b 
+        + x * (2 * x - 1) * c;
 }
 
 // clang-format off
@@ -96,14 +96,12 @@ T quadratic(const T& a, const T& b, const T& c, F x) {
 template <typename T, typename F = double>
 T biQuadratic(const std::array<T, 9>& v, F x, F y) {
 
-    auto dx = x - floor(x);
-    auto dy = y - floor(y);
 
-    auto interPolatedVal1 = quadratic(v[0], v[1], v[2], dx);
-    auto interPolatedVal2 = quadratic(v[3], v[4], v[5], dx);
-    auto interPolatedVal3 = quadratic(v[6], v[7], v[8], dx);
+    auto interPolatedVal1 = quadratic(v[0], v[1], v[2], x);
+    auto interPolatedVal2 = quadratic(v[3], v[4], v[5], x);
+    auto interPolatedVal3 = quadratic(v[6], v[7], v[8], x);
 
-    return quadratic(interPolatedVal1, interPolatedVal2, interPolatedVal3, dy);
+    return quadratic(interPolatedVal1, interPolatedVal2, interPolatedVal3, y);
 }
 
 
