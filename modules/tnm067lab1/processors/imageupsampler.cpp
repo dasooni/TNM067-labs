@@ -50,6 +50,7 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
                 finalColor = inPixels[inIndex(glm::clamp(size2_t(inImageCoords), 
                     size2_t(0),
                     size2_t(inputSize - size2_t(1))))];
+                //finalColor = inPixels[inIndex(floor(inImageCoords))];
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Bilinear: {
@@ -63,8 +64,8 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
                     inPixels[inIndex(b)], 
                     inPixels[inIndex(c)] };
 
-                double x = inImageCoords.x - std::floor(inImageCoords.x);
-                double y = inImageCoords.y - std::floor(inImageCoords.y);
+                auto x = inImageCoords.x - std::floor(inImageCoords.x);
+                auto y = inImageCoords.y - std::floor(inImageCoords.y);
 
                 finalColor = TNM067::Interpolation::bilinear(n, x, y);
                 break;
