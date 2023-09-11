@@ -47,13 +47,35 @@ vec3 HydrogenGenerator::cartesianToSpherical(vec3 cartesian) {
 
     // TASK 1: implement conversion using the equations in the lab script
 
+    auto r = sqrt(pow(cartesian.x, 2) + pow(cartesian.y, 2) + pow(cartesian.z, 2));
+    auto phi = atan2(cartesian.y, cartesian.x);
+    auto theta = atan2(hypot(cartesian.x, cartesian.y), cartesian.z);
+
+    sph.r = r;
+    sph.t = theta;
+    sph.p = phi;
+
     return sph;
 }
 
 double HydrogenGenerator::eval(vec3 cartesian) {
-    const double density = cartesian.x;
+
+    vec3 sph = cartesianToSpherical(cartesian);
+
+    auto r = sph.r;
+    auto theta = sph.t;
+    
+    const double Z = 1;
+    const double a0 = 1;
 
     // TASK 2: Evaluate wave function
+    auto psi_1 = 1.f / (81.f * sqrt(6.f * M_PI));
+    auto psi_2 = pow((Z / a0), 3.f / 2.f);
+    auto psi_3 = (pow(Z, 2.f) * pow(r, 2.f)) / pow(a0, 2.f);
+    auto psi_4 = exp(-Z * r / (3.f * a0));
+    auto psi_5 = 3.f * pow(cos(theta), 2.f) - 1.f;
+
+    const double density = pow(psi_1 * psi_2 * psi_3 * psi_4 * psi_5, 2.0);
 
     return density;
 }
