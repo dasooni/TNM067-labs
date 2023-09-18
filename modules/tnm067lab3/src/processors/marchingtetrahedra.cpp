@@ -135,8 +135,11 @@ void MarchingTetrahedra::process() {
 }
 
 int MarchingTetrahedra::calculateDataPointIndexInCell(ivec3 index3D) {
-    // TODO: TASK 1: map 3D index to 1D
-    return 0;
+    // TODO: TASK 1: map index3D to a 1D-index
+
+    int size = 2;
+
+    return index3D.x + index3D.y * size + index3D.z * size * size;
 }
 
 vec3 MarchingTetrahedra::calculateDataPointPos(size3_t posVolume, ivec3 posCell, ivec3 dims) {

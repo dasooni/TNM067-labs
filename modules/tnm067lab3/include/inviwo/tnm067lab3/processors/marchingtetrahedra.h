@@ -66,7 +66,7 @@ public:
     virtual ~MarchingTetrahedra() = default;
 
     // TODO: TASK 5: change 0 to 1 when functions are implemented
-    #define ENABLE_DATAPOINT_INDEX_TEST 0
+    #define ENABLE_DATAPOINT_INDEX_TEST 1
     static int calculateDataPointIndexInCell(ivec3 index3D);
 
     #define ENABLE_DATAPOINT_POS_TEST 0

@@ -86,8 +86,8 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
 					inPixels[inIndex(origin + dvec2(1, 2))], 
 					inPixels[inIndex(origin + dvec2(2, 2))] };
 
-                auto x = inImageCoords.x - std::floor(inImageCoords.x);
-                auto y = inImageCoords.y - std::floor(inImageCoords.y);
+                auto x = (inImageCoords.x - std::floor(inImageCoords.x))/2;
+                auto y = (inImageCoords.y - std::floor(inImageCoords.y))/2;
 
                 finalColor = TNM067::Interpolation::biQuadratic(n, x, y);
                 break;
