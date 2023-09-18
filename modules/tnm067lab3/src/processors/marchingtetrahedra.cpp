@@ -73,10 +73,39 @@ void MarchingTetrahedra::process() {
                 // Spatial position should be between 0 and 1
 
                 // TODO: TASK 2: create a nested for loop to construct the cell
-                Cell c;
+                Cell c{};
+
+                // Use calculateDataPointIndexInCell(vec3 index3D) and calculateDataPointPos(posVolume, posCell, dims)
+
+                for (auto i = 0; i < 2; i++) {
+                    for (auto j = 0; j < 2; j++) {
+                        for (auto k = 0; k < 2; k++) {
+                            vec3 posCell = vec3(i, j, k);
+
+                            auto scaledCellPos = calculateDataPointPos(pos, posCell, dims);
+                            int cellIndex = calculateDataPointIndexInCell(posCell);
+                            auto cellVal =
+                                volume->getAsDouble(vec3{pos.x + i, pos.y + j, pos.z + k});
+
+                            c.dataPoints[cellIndex].pos = scaledCellPos;
+                            c.dataPoints[cellIndex].value = cellVal;
+                            c.dataPoints[cellIndex].indexInVolume = cellIndex;
+                        }
+                    }
+                
+                }
+
 
                 // TODO: TASK 3: Subdivide cell into 6 tetrahedra (hint: use tetrahedraIds)
                 std::vector<Tetrahedra> tetrahedras;
+
+                for (auto i = 0; i < 6; i++) {
+					Tetrahedra t{};
+                    for (auto j = 0; j < 4; j++) {
+						t.dataPoints[j] = c.dataPoints[tetrahedraIds[i][j]];
+					}
+					tetrahedras.push_back(t);
+				}
 
                 for (const Tetrahedra& tetrahedra : tetrahedras) {
                     // TODO: TASK 4: Calculate case id for each tetrahedra, and add triangles for
@@ -135,16 +164,28 @@ void MarchingTetrahedra::process() {
 }
 
 int MarchingTetrahedra::calculateDataPointIndexInCell(ivec3 index3D) {
-    // TODO: TASK 1: map index3D to a 1D-index
+    // index3D: 3D-index of the data point in the cell
 
     int size = 2;
-
+    // https://stackoverflow.com/questions/21596373/compute-shaders-input-3d-array-of-floats
     return index3D.x + index3D.y * size + index3D.z * size * size;
 }
 
 vec3 MarchingTetrahedra::calculateDataPointPos(size3_t posVolume, ivec3 posCell, ivec3 dims) {
-    // TODO: TASK 1: scale DataPoint position with dimensions to be between 0 and 1
-    return vec3(0, 0, 0);
+    // posVolume: position of the cell in the volume
+    // posCell: 3D-index of the data point in the cell
+    // dims: dimensions of the volume
+    // 
+    // This function should return the position of the data point within the volume scaled
+    // between 0 and 1
+
+    vec3 normalizedPos{};
+
+    normalizedPos.x = static_cast<float>(posVolume.x + posCell.x) / (dims.x - 1);
+    normalizedPos.y = static_cast<float>(posVolume.y + posCell.y) / (dims.y - 1);
+    normalizedPos.z = static_cast<float>(posVolume.z + posCell.z) / (dims.z - 1);
+
+    return normalizedPos;
 }
 
 MarchingTetrahedra::MeshHelper::MeshHelper(std::shared_ptr<const Volume> vol)

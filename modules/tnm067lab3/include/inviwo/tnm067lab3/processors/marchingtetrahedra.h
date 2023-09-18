@@ -69,7 +69,7 @@ public:
     #define ENABLE_DATAPOINT_INDEX_TEST 1
     static int calculateDataPointIndexInCell(ivec3 index3D);
 
-    #define ENABLE_DATAPOINT_POS_TEST 0
+    #define ENABLE_DATAPOINT_POS_TEST 1
     static vec3 calculateDataPointPos(size3_t posVolume, ivec3 posCell, ivec3 dims);
 
     virtual void process() override;
