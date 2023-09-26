@@ -119,9 +119,10 @@ void MarchingTetrahedra::process() {
                         case 0:
                         case 15:
                             break;
+
                         case 1:
                         case 14: {
-
+                           
                             break;
                         }
                         case 2:
