@@ -80,27 +80,26 @@ void MarchingTetrahedra::process() {
                 for (auto i = 0; i < 2; i++) {
                     for (auto j = 0; j < 2; j++) {
                         for (auto k = 0; k < 2; k++) {
-                            vec3 posCell = vec3(i, j, k);
+                            vec3 posCell = vec3(k, j, i);
 
                             auto scaledCellPos = calculateDataPointPos(pos, posCell, dims);
                             int cellIndex = calculateDataPointIndexInCell(posCell);
-                            auto cellVal =
-                                volume->getAsDouble(vec3{pos.x + i, pos.y + j, pos.z + k});
+                            auto cellVal = volume->getAsDouble(vec3{pos.x + k, pos.y + j, pos.z + i});
 
                             c.dataPoints[cellIndex].pos = scaledCellPos;
                             c.dataPoints[cellIndex].value = cellVal;
-                            c.dataPoints[cellIndex].indexInVolume = cellIndex;
+                            c.dataPoints[cellIndex].indexInVolume =
+                                mapVolPosToIndex(vec3{pos.x + k, pos.y + j, pos.z + i});
                         }
                     }
                 
                 }
-
-
                 // TODO: TASK 3: Subdivide cell into 6 tetrahedra (hint: use tetrahedraIds)
                 std::vector<Tetrahedra> tetrahedras;
 
+                Tetrahedra t;
+
                 for (auto i = 0; i < 6; i++) {
-					Tetrahedra t{};
                     for (auto j = 0; j < 4; j++) {
 						t.dataPoints[j] = c.dataPoints[tetrahedraIds[i][j]];
 					}
@@ -111,48 +110,184 @@ void MarchingTetrahedra::process() {
                     // TODO: TASK 4: Calculate case id for each tetrahedra, and add triangles for
                     // each case (use MeshHelper)
 
+
                     // Calculate for tetra case index
                     int caseId = 0;
 
+                    for (auto i = 0; i < 4; i++) {
+                        if (tetrahedra.dataPoints[i].value < iso) {
+                            caseId += pow(2, i);
+                        }
+                    }
+
+                    auto i1 = tetrahedra.dataPoints[0].indexInVolume;
+                    auto i2 = tetrahedra.dataPoints[1].indexInVolume;
+                    auto i3 = tetrahedra.dataPoints[2].indexInVolume;
+                    auto i4 = tetrahedra.dataPoints[3].indexInVolume;
+
+                    auto v1 = tetrahedra.dataPoints[0].value;
+                    auto v2 = tetrahedra.dataPoints[1].value;
+                    auto v3 = tetrahedra.dataPoints[2].value;
+                    auto v4 = tetrahedra.dataPoints[3].value;
+
+                    auto p1 = tetrahedra.dataPoints[0].pos;
+                    auto p2 = tetrahedra.dataPoints[1].pos;
+                    auto p3 = tetrahedra.dataPoints[2].pos;
+                    auto p4 = tetrahedra.dataPoints[3].pos;
+                    
                     // Extract triangles
                     switch (caseId) {
                         case 0:
                         case 15:
                             break;
-
                         case 1:
                         case 14: {
-                           
+
+                            vec3 interp1 = p1 + (p2 - p1) * (iso - v1) / (v2 - v1);
+                            vec3 interp2 = p1 + (p4 - p1) * (iso - v1) / (v4 - v1);
+                            vec3 interp3 = p1 + (p3 - p1) * (iso - v1) / (v3 - v1);
+
+                            auto t1 = mesh.addVertex(interp1, i1, i2);
+                            auto t2 = mesh.addVertex(interp2, i1, i4);
+                            auto t3 = mesh.addVertex(interp3, i1, i3);
+
+                            if (caseId == 14) {
+                                mesh.addTriangle(t1, t2, t3);
+                                
+                            } else {
+                                mesh.addTriangle(t1, t3, t2);
+                            }
                             break;
                         }
                         case 2:
                         case 13: {
 
+                            vec3 interp1 = p2 + (p4 - p2) * (iso - v2) / (v4 - v2);
+                            vec3 interp2 = p2 + (p3 - p2) * (iso - v2) / (v3 - v2);
+                            vec3 interp3 = p2 + (p1 - p2) * (iso - v2) / (v1 - v2);
+
+                            auto t1 = mesh.addVertex(interp1, i2, i4);
+                            auto t2 = mesh.addVertex(interp2, i2, i3);
+                            auto t3 = mesh.addVertex(interp3, i2, i1);
+
+                            if (caseId == 2) {
+                                mesh.addTriangle(t1, t2, t3);
+
+                            } else {
+                                mesh.addTriangle(t1, t3, t2);
+                            }
                             break;
+
                         }
                         case 3:
                         case 12: {
+
+                            vec3 interp1 = p2 + (p3 - p2) * (iso - v2) / (v3 - v2);
+                            vec3 interp2 = p2 + (p4 - p2) * (iso - v2) / (v4 - v2);
+                            vec3 interp3 = p1 + (p4 - p1) * (iso - v1) / (v4 - v1);
+                            vec3 interp4 = p1 + (p3 - p1) * (iso - v1) / (v3 - v1);
+
+                            auto t1 = mesh.addVertex(interp1, i2, i3);
+                            auto t2 = mesh.addVertex(interp2, i2, i4);
+                            auto t3 = mesh.addVertex(interp3, i1, i4);
+                            auto t4 = mesh.addVertex(interp4, i1, i3);
+
+
+                            if (caseId == 3) {
+                                mesh.addTriangle(t1, t3, t2);
+                                mesh.addTriangle(t1, t4, t3);
+
+                            } else {
+                                mesh.addTriangle(t3, t1, t2);
+                                mesh.addTriangle(t4, t1, t3);
+                            }
 
                             break;
                         }
                         case 4:
                         case 11: {
 
+                            vec3 interp1 = p3 + (p1 - p3) * (iso - v3) / (v1 - v3);
+                            vec3 interp2 = p3 + (p2 - p3) * (iso - v3) / (v2 - v3);
+                            vec3 interp3 = p3 + (p4 - p3) * (iso - v3) / (v4 - v3);
+
+                            auto t1 = mesh.addVertex(interp1, i3, i1);
+                            auto t2 = mesh.addVertex(interp2, i3, i2);
+                            auto t3 = mesh.addVertex(interp3, i3, i4);
+
+                            if (caseId == 4) {
+                                mesh.addTriangle(t1, t2, t3);
+
+                            } else {
+                                mesh.addTriangle(t1, t3, t2);
+                            }
+
                             break;
                         }
                         case 5:
                         case 10: {
+
+                            vec3 interp1 = p1 + (p4 - p1) * (iso - v1) / (v4 - v1);
+                            vec3 interp2 = p1 + (p2 - p1) * (iso - v1) / (v2 - v1);
+                            vec3 interp3 = p3 + (p2 - p3) * (iso - v3) / (v2 - v3);
+                            vec3 interp4 = p3 + (p4 - p3) * (iso - v3) / (v4 - v3);
+
+                            auto t1 = mesh.addVertex(interp1, i1, i4);
+                            auto t2 = mesh.addVertex(interp2, i1, i2);
+                            auto t3 = mesh.addVertex(interp3, i3, i2);
+                            auto t4 = mesh.addVertex(interp4, i3, i4);
+
+                            if (caseId == 5) {
+                                mesh.addTriangle(t1, t2, t3);
+                                mesh.addTriangle(t1, t3, t4);
+
+                            } else {
+                                mesh.addTriangle(t3, t2, t1);
+                                mesh.addTriangle(t4, t3, t1);
+                            }
 
                             break;
                         }
                         case 6:
                         case 9: {
 
+                            vec3 interp1 = p1 + (p3 - p1) * (iso - v1) / (v3 - v1);
+                            vec3 interp2 = p1 + (p2 - p1) * (iso - v1) / (v2 - v1);
+                            vec3 interp3 = p2 + (p4 - p2) * (iso - v2) / (v4 - v2);
+                            vec3 interp4 = p3 + (p4 - p3) * (iso - v3) / (v4 - v3);
+
+                            auto t1 = mesh.addVertex(interp1, i1, i3);
+                            auto t2 = mesh.addVertex(interp2, i1, i2);
+                            auto t3 = mesh.addVertex(interp3, i2, i4);
+                            auto t4 = mesh.addVertex(interp4, i3, i4);
+
+                            if (caseId == 9) {
+                                mesh.addTriangle(t1, t3, t2);
+                                mesh.addTriangle(t1, t4, t3);
+
+                            } else {
+                                mesh.addTriangle(t1, t2, t3);
+                                mesh.addTriangle(t1, t3, t4);
+                            }
+
                             break;
                         }
                         case 7:
                         case 8: {
+                            vec3 interp1 = p4 + (p1 - p4) * (iso - v4) / (v1 - v4);
+                            vec3 interp2 = p4 + (p2 - p4) * (iso - v4) / (v2 - v4);
+                            vec3 interp3 = p4 + (p3 - p4) * (iso - v4) / (v3 - v4);
 
+                            auto t1 = mesh.addVertex(interp1, i4, i1);
+                            auto t2 = mesh.addVertex(interp2, i4, i2);
+                            auto t3 = mesh.addVertex(interp3, i4, i3);
+
+                            if (caseId == 8) {
+                                mesh.addTriangle(t1, t3, t2);
+
+                            } else {
+                                mesh.addTriangle(t1, t2, t3);
+                            }                                                                               
                             break;
                         }
                     }
@@ -202,6 +337,8 @@ void MarchingTetrahedra::MeshHelper::addTriangle(size_t i0, size_t i1, size_t i2
     IVW_ASSERT(i0 != i1, "i0 and i1 should not be the same value");
     IVW_ASSERT(i0 != i2, "i0 and i2 should not be the same value");
     IVW_ASSERT(i1 != i2, "i1 and i2 should not be the same value");
+
+    
 
     indexBuffer_->add(static_cast<glm::uint32_t>(i0));
     indexBuffer_->add(static_cast<glm::uint32_t>(i1));
