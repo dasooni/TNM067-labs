@@ -10,19 +10,41 @@ float passThrough(vec2 coord){
 
 float magnitude( vec2 coord ){
     //TASK 1: find the magnitude of the vectorfield at the position coords
-    return 0.0;
+	
+	
+    return length(coord);
 }
 
 float divergence(vec2 coord){
     //TASK 2: find the divergence of the vectorfield at the position coords
     vec2 pixelSize = vfParameters.reciprocalDimensions;
-    return 0.0;
+	
+	vec2 center = texture(vfColor, coord).xy;
+	vec2 left = texture(vfColor, coord - vec2(pixelSize.x, 0.0)).xy;
+	vec2 right = texture(vfColor, coord + vec2(pixelSize.x, 0.0)).xy;
+	vec2 up = texture(vfColor, coord + vec2(0.0, pixelSize.y)).xy;
+	vec2 down = texture(vfColor, coord - vec2(0.0, pixelSize.y)).xy;
+	
+	vec2 gradX = (right - left) / (2 * pixelSize.x);
+	vec2 gradY = (up - down) / (2 * pixelSize.y);
+	
+    return gradX.x + gradY.y;
 }
 
 float rotation(vec2 coord){
     //TASK 3: find the curl of the vectorfield at the position coords
     vec2 pixelSize = vfParameters.reciprocalDimensions;
-    return 0.0;
+	
+    vec2 center = texture(vfColor, coord).xy;
+	vec2 left = texture(vfColor, coord - vec2(pixelSize.x, 0.0)).xy;
+	vec2 right = texture(vfColor, coord + vec2(pixelSize.x, 0.0)).xy;
+	vec2 up = texture(vfColor, coord + vec2(0.0, pixelSize.y)).xy;
+	vec2 down = texture(vfColor, coord - vec2(0.0, pixelSize.y)).xy;
+	
+	vec2 gradX = (right - left) / (2 * pixelSize.x);
+	vec2 gradY = (up - down) / (2 * pixelSize.y);
+	
+    return gradY.x - gradX.y;
 }
 
 void main(void) {
